@@ -1,80 +1,76 @@
-Directory tree structure for sys_mgmt  
+## Directory tree structure for sys_mgmt  
+##
+#
+# [ansadm@xyz  ansible]$ cd /etc/ansible/ 
+#
+# [ansadm@server1 ansible]$ tree 
+#
+# . 
+#
+# ├── ansible.cfg 
+#
+# ├── hosts 
+#
+# ├── hosts_orig 
+#
+# └── sys_mgmt 
+#
+#    ├── group_vars 
+#
+#    │   ├── user_create_orig.yml 
+#
+#    │   ├── user_create_var.yml 
+#
+#    │   ├── user_remove_orig.yml 
+#
+#    │   ├── user_remove_var.yml 
+#
+#    │   ├── user_search_orig.yml 
+#
+#    │   └── user_search_var.yml 
+#
+#    ├── hosts 
+#
+#    ├── playbook_usermgmt.yml 
+#
+#    ├── roles 
+#
+#    │   └── user_mgmt 
+#
+#    │       └── tasks 
+#
+#    │           └── main.yml 
+#
+#    └── script_usrmgmt.sh 
+#
+#  
+#  
+#
+#----------------------------------------------------------------------------- 
+#
+## Inventory File 
+##
+#  
+#
 
-  
 
-[ansadm@xyz  ansible]$ cd /etc/ansible/ 
-
-[ansadm@server1 ansible]$ tree 
-
-. 
-
-├── ansible.cfg 
-
-├── hosts 
-
-├── hosts_orig 
-
-└── sys_mgmt 
-
-    ├── group_vars 
-
-    │   ├── user_create_orig.yml 
-
-    │   ├── user_create_var.yml 
-
-    │   ├── user_remove_orig.yml 
-
-    │   ├── user_remove_var.yml 
-
-    │   ├── user_search_orig.yml 
-
-    │   └── user_search_var.yml 
-
-    ├── hosts 
-
-    ├── playbook_usermgmt.yml 
-
-    ├── roles 
-
-    │   └── user_mgmt 
-
-    │       └── tasks 
-
-    │           └── main.yml 
-
-    └── script_usrmgmt.sh 
-
-  
-
-5 directories, 13 files 
-
-[ansadm@server1  ansible]$ 
-
-  
-
------------------------------------------------------------------------------ 
-
-Inventory File 
-
-  
-
-[ansadm@server1 ansible]$ cat sys_mgmt/hosts 
+# [ansadm@server1 ansible]$ cat sys_mgmt/hosts 
 
 [localserver] 
 
 localhost       ansible_connection=local 
 
-  
-
-  
-
------------------------------------------------------------------------------ 
-
-Bash Script  
-
-  
-
-[ansadm@server1 ansible]$ cat sys_mgmt/script_usrmgmt.sh 
+#  
+#
+#  
+#
+#----------------------------------------------------------------------------- 
+#
+# Bash Script  
+#
+#  
+#
+# [ansadm@server1 ansible]$ cat sys_mgmt/script_usrmgmt.sh 
 
 #!/bin/bash 
 

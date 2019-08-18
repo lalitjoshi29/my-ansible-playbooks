@@ -1,0 +1,38 @@
+### 
+### Scenario: Need to change user password or root password on multiple servers.  
+###
+### Solution:  Automate this process using ansible playbook.  
+#
+#  
+#
+### Inventory file 
+#
+## cat /etc/ansible/hosts 
+
+[devservers] 
+
+devserver1 
+
+devserver2 
+
+devserver3 
+
+devserver4 
+
+  
+
+[testservers] 
+
+testserver1 
+
+testserver2 
+
+  
+
+[webservers] 
+
+webnode1 
+
+webnode2 
+
+  
