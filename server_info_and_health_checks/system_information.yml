@@ -1,0 +1,33 @@
+### cat sysinfo_play.yml
+
+---
+
+- hosts: all
+
+  tasks:
+
+    - name: basic system info
+
+      #shell: lscpu | grep 'Vendor ID'; lscpu | grep 'Model name'; lscpu | grep -i 'CPU MHz'; grep -c 'processor' /proc/cpuinfo;grep 'cpu cores' /proc/cpuinfo |cut -d":" -f2; free -m -h | grep -i mem | cut -c1-20 
+
+      shell: hostname; lscpu | grep 'Vendor ID'; lscpu | grep 'Model name'; lscpu | grep -i 'CPU MHz'; grep -m 1 'processor' /proc/cpuinfo | cut -d$'\t' -f1; grep -c 'processor' /proc/cpuinfo; grep -m 1 'cpu cores' /proc/cpuinfo |cut -d$'\t' -f1; grep 'cpu cores' /proc/cpuinfo |cut -d":" -f2 | awk '{s+=$1} END {print s}'; free -m -h | grep -i mem | cut -c1-20
+
+      #shell: lscpu | grep 'vendor_id'; lscpu | grep 'Model name'; lscpu | grep -i 'cpu MHz';echo -n 'No. of CPU: '; lscpu | grep -c 'processor'; echo -n 'Core Count: '; lscpu | grep 'cpu cores' |cut -d: -f2 | awk '{s+=$1} END {print s}'; free -m -h | grep -i mem | cut -c1-20; 
+
+      register: system_info
+
+
+
+    - debug: var=system_info.stdout_lines
+
+#grep -m 1 "vendor_id" /proc/cpuinfo; 
+
+#grep -m 1 "model name" /proc/cpuinfo; 
+
+#grep -m 1 "cpu MHz" /proc/cpuinfo; 
+
+#echo -n "No. of CPU: "; grep -c "processor" /proc/cpuinfo; 
+
+#echo -n "Core count: "; grep "cpu cores" /proc/cpuinfo |cut -d":" -f2 | awk '{s+=$1} END {print s}'; 
+
+#echo "scale=2; $(lsblk --nodeps --bytes --noheadings --output SIZE |  awk '{s+=$1} END {print s}') / 1024^3" | bc
