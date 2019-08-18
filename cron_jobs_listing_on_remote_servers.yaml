@@ -1,6 +1,6 @@
   
 
-cat playbook_cronlist.yml 
+### cat playbook_cronlist.yml 
 
 --- 
 
@@ -76,7 +76,7 @@ cat playbook_cronlist.yml
 
 --------------------------------------------------------------------------------------------------------------------------------------------------- 
 
-cat croninfo.sh 
+### cat croninfo.sh 
 
 #!/bin/bash 
 

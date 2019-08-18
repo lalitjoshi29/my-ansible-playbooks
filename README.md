@@ -13,10 +13,9 @@ I have created some playbooks on:
     > Create an encrypted password
     > Change passoword for a user
 * OS patching playbook and scripts
-
 * Disk usage alert monitoring scripts
-
 * File comaprison (Local server and Remote servers).
 * Port status on remote servers
 * File modification (Adding and removing lines).
-
+* Cron Job listing on remote servers
+ 
