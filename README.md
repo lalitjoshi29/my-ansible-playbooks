@@ -10,7 +10,7 @@ I have created some playbooks on:
     > Add a sudo entry in /etc/sudoers file
     > Remove a sudo entry from /etc/sudoers file
 * Password Management
-    > Create an encrypted password
+    > Create an encrypted password using python
     > Change passoword for a user
 * OS patching playbook and scripts
 * Disk usage alert monitoring scripts
