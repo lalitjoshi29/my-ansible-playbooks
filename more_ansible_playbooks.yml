@@ -1,0 +1,872 @@
+$ cat playbook_add_line_after.yml 
+
+--- 
+
+- name: Add a line after a matching pattarn 
+
+  hosts: all 
+
+  become: yes 
+
+  remote_user: myadmin 
+
+  
+
+  tasks: 
+
+    - name: Inserting a line after a pattern match 
+
+      lineinfile: 
+
+        path: /etc/sudoers 
+
+        state: present 
+
+        backup: yes 
+
+        line: Defaults:scom_local !requiretty 
+
+        insertafter: Defaults    requiretty 
+
+        validate: '/usr/sbin/visudo -cf %s' 
+
+  
+
+  
+
+  
+
+--------------------------------------------------------------------------------------- 
+
+  
+
+$ cat playbook_add_line_before.yml 
+
+--- 
+
+- name: Add a line after a matching pattarn 
+
+  hosts: all 
+
+  become: yes 
+
+  remote_user: myadmin 
+
+  
+
+  tasks: 
+
+    - name: Inserting a line after a pattern match 
+
+      lineinfile: 
+
+        path: /etc/sudoers 
+
+        state: present 
+
+        backup: yes 
+
+        line: '### Added below entry for scom monitoring agent' 
+
+        insertbefore: 'scom_local ALL=NOPASSWD: ALL' 
+
+        validate: '/usr/sbin/visudo -cf %s' 
+
+  
+
+--------------------------------------------------------------------------------------- 
+
+  
+
+$ cat playbook_local_rpm_install.yml 
+
+--- 
+
+  - name: Playbook for installing a local rpm to multiple servers 
+
+    hosts: all 
+
+    become: yes 
+
+    remote_user: myadmin 
+
+  
+
+    tasks: 
+
+       - name: Copy rpm file to server 
+
+         copy: 
+
+           src: /var/tmp/scx-1.5.1-216.rhel.6.x64.rpm 
+
+           dest: /var/tmp/scx-1.5.1-216.rhel.6.x64.rpm 
+
+  
+
+       - name: Install rpm package 
+
+         yum: 
+
+           name: /var/tmp/scx-1.5.1-216.rhel.6.x64.rpm 
+
+           state: present 
+
+  
+
+-------------------------------------------------------------------------------------- 
+
+  
+
+$ cat  playbook_passwdchg.yml 
+
+  
+
+--- 
+
+ - name: playbook for changing User password on multiple servers 
+
+   hosts: testserver 
+
+   user: myadmin 
+
+   become: yes 
+
+  
+
+   vars_prompt: 
+
+       - name: user_name 
+
+         private: no 
+
+         prompt: "Enter the user name for which password needs to be changed:" 
+
+  
+
+       - name: user_hashed_pass 
+
+         private: yes 
+
+       # prompt: "Enter the password hash genergated by python command:" 
+
+         prompt: "Enter the password " 
+
+         encrypt: "sha512_crypt" 
+
+         confirm: yes 
+
+         salt_size: 7 
+
+  
+
+   tasks: 
+
+      - name: Get user info 
+
+        shell: egrep "^{{ user_name }}:" /etc/passwd 
+
+        ignore_errors: yes 
+
+        register: user_info 
+
+  
+
+      - name: user password change 
+
+        user: 
+
+           name={{ user_name }} 
+
+           update_password=always 
+
+           password="{{ user_hashed_pass }}" 
+
+        when: user_info.rc == 0 
+
+  
+
+  
+
+  
+
+####### python -c 'import crypt,getpass; print crypt.crypt(getpass.getpass())'  ##### 
+
+  
+
+------------------------------------------------------------------------------------ 
+
+  
+
+  
+
+$ cat playbook_update_user.yml 
+
+--- 
+
+   - name: update user info - playbook 
+
+     hosts: all 
+
+     become: yes 
+
+  
+
+  
+
+     tasks: 
+
+         - name: update user's GECOS 
+
+           user: 
+
+             name: myadmin 
+
+             comment: "ansible automation account" 
+
+             state: present 
+
+  
+
+------------------------------------------------------------------------------------- 
+
+$ cat playbook_useradd.yml 
+
+--- 
+
+  - name: Playbook for adding a local account 
+
+    hosts: all 
+
+    become: yes 
+
+    remote_user: myadmin 
+
+    vars: 
+
+       - user_name: scom_local 
+
+  
+
+    tasks: 
+
+       - name: add a local user 
+
+         user: 
+
+           name: "{{ user_name }}" 
+
+           state: present 
+
+           comment: scom_local account for monitoring 
+
+           shell: /bin/bash 
+
+  
+
+------------------------------------------------------------------------------------- 
+
+  
+
+$ cat playbook_sudoadd.yml 
+
+  
+
+--- 
+
+## Interactive playbook for sudo configuration update 
+
+ - name: sudo management playbook 
+
+   hosts: all 
+
+   user: myadmin 
+
+   become: yes 
+
+  
+
+   vars_prompt: 
+
+      - name: sudo_add 
+
+        private: no 
+
+        prompt: "Enter the sudo entry which need to add" 
+
+   tags: add_sudo_entry 
+
+  
+
+  
+
+   roles: 
+
+      - sudoadd 
+
+  
+
+  
+
+------------------------ 
+
+$ cat roles/sudoadd/tasks/main.yml 
+
+--- 
+
+  
+
+- name: Adding sudo entry in /etc/sudoers file 
+
+  lineinfile: 
+
+        path: /etc/sudoers 
+
+        state: present 
+
+        backup: yes 
+
+        regexp: '^{{ sudo_add }}' 
+
+        line: '{{ sudo_add }}' 
+
+        validate: '/usr/sbin/visudo -cf %s' 
+
+  tags: add_sudo_entry 
+
+  
+
+----------------------------------------------------------------------------------- 
+
+  
+
+$ cat playbook_sudodel.yml 
+
+  
+
+--- 
+
+## Interactive playbook for sudo configuration update 
+
+ - name: sudo management playbook 
+
+   hosts: all 
+
+   user: myadmin 
+
+   become: yes 
+
+   ignore_errors: yes 
+
+  
+
+   vars_prompt: 
+
+       - name: sudo_del 
+
+         private: no 
+
+         prompt: "Enter the sudo entry which needs to remove" 
+
+         #default: "xyz" 
+
+   tags: remove_sudo_entry 
+
+  
+
+   roles: 
+
+      - sudodel 
+
+  
+
+  
+
+----------------- 
+
+$ cat roles/sudodel/tasks/main.yml 
+
+--- 
+
+  
+
+- name: Removing sudo entry on {{ ansible_hostname }} 
+
+  lineinfile: 
+
+        path: /etc/sudoers 
+
+        backup: yes 
+
+        state: absent 
+
+        regexp: '^{{ sudo_del }}' 
+
+        line: '{{ sudo_del }}' 
+
+        validate: '/usr/sbin/visudo -cf %s' 
+
+  tags: remove_sudo_entry 
+
+  
+
+------------------------------------------------------------------------------------ 
+
+  
+
+  
+
+$ cat playbook_sudosearch.yml 
+
+--- 
+
+## Interactive playbook for sudo configuration update 
+
+ - name: sudo management playbook 
+
+   hosts: all 
+
+   serial: 1 
+
+   user: myadmin 
+
+   become: yes 
+
+   become_method: sudo 
+
+   ignore_errors: yes 
+
+  
+
+   vars: 
+
+     - sudo_out_dir: /var/tmp 
+
+  
+
+   vars_prompt: 
+
+       - name: sudo_find 
+
+         private: no 
+
+         prompt: "Enter the user account which needs to be find in sudoers file" 
+
+         #default: "zxc" 
+
+         tags: find_sudo_entry 
+
+  
+
+   roles: 
+
+      - sudosearch 
+
+  
+
+----------------- 
+
+$ cat roles/sudosearch/tasks/main.yml 
+
+--- 
+
+ - name: search a sudo entry in /etc/sudoers file on {{ inventory_hostname }} 
+
+   shell: if grep "{{ sudo_find }}" /etc/sudoers > /dev/null; then echo "user_exists_on_the_server"; else echo "user_does_not_exist_on_the_server"; fi 
+
+   register: sudo_entry_exists 
+
+ #  changed_when: false 
+
+   ignore_errors: yes 
+
+   tags: find_sudo_entry 
+
+  
+
+# - meta: clear_host_errors 
+
+  
+
+ - name: write data to a file under {{ sudo_out_dir }} of control node if entry exists 
+
+   become: no 
+
+   lineinfile: 
+
+       path: "{{ sudo_out_dir }}/sudofind-{{ sudo_find }}-{{ ansible_date_time.date }}.txt" 
+
+      #path: "{{ sudo_out_dir }}/sudofind-{{ sudo_find }}.txt" 
+
+       backup: no 
+
+       state: present 
+
+       create: yes 
+
+       line: "{{ sudo_find }} {{ sudo_entry_exists.stdout }} {{ inventory_hostname }}" 
+
+   when: sudo_entry_exists.stdout == "user_exists_on_the_server" 
+
+   delegate_to: localhost 
+
+   tags: find_sudo_entry 
+
+  
+
+ #- meta: clear_host_errors 
+
+  
+
+---------------------------------------------------------------------------------------- 
+
+  
+
+$ cat playbook_sudodel_multiple_entries.yml 
+
+--- 
+
+## Playbook for deleting multiple sudo entries 
+
+- name: Delete multiple sudo entries 
+
+  hosts: testing 
+
+  user: myadmin 
+
+  become: yes 
+
+  #ignore_errors: yes 
+
+  
+
+  vars_files: 
+
+      - vars/sudo_remove_users.yml 
+
+  
+
+  tasks: 
+
+    - name: Taking backup of sudoers file 
+
+      command: cp -p /etc/sudoers /etc/sudoers_CHG0037440 
+
+  
+
+    - name: Removing sudo entry from /etc/sudoers file 
+
+      lineinfile: 
+
+           path: /etc/sudoers 
+
+           #backup: yes 
+
+           state: absent 
+
+           regexp: '^{{ item }}' 
+
+           line: '{{ item }}' 
+
+           validate: '/usr/sbin/visudo -cf %s' 
+
+      with_items: '{{ sudo_users }}' 
+
+  
+
+  
+
+  
+
+$ cat vars/sudo_remove_users.yml 
+
+--- 
+
+sudo_users: 
+
+  - unixuser1 
+
+  - unixuser2 
+
+  - unixuser3 
+
+  - appuser1 
+
+  - appuser2 
+
+  - dbuser1 
+
+  - dbuser2 
+
+  
+
+---------------------------------------------------------------------------------------- 
+
+  
+
+--- 
+
+- name: Add a line after a matching pattarn 
+
+  hosts: serverlist 
+
+  become: yes 
+
+  gather_facts: false 
+
+  remote_user: myadmin 
+
+  vars: 
+
+       - sudo_add : 'scom_local ALL=NOPASSWD: ALL' 
+
+  
+
+  
+
+  tasks: 
+
+    - name: Inserting a line after a pattern match 
+
+      lineinfile: 
+
+        path: /etc/sudoers 
+
+        state: present 
+
+        backup: yes 
+
+        line: Defaults:scom_local !requiretty 
+
+        insertafter: Defaults    requiretty 
+
+        validate: '/usr/sbin/visudo -cf %s' 
+
+  
+
+  
+
+  
+
+    - name: Adding sudo entry in /etc/sudoers file 
+
+      lineinfile: 
+
+        path: /etc/sudoers 
+
+        state: present 
+
+        backup: yes 
+
+        regexp: '^{{ sudo_add }}' 
+
+        line: '{{ sudo_add }}' 
+
+        validate: '/usr/sbin/visudo -cf %s' 
+
+  
+
+$ cat playbook_add_line_before.yml 
+
+--- 
+
+- name: Add a line after a matching pattarn 
+
+  hosts: all 
+
+  become: yes 
+
+  remote_user: myadmin 
+
+  
+
+  tasks: 
+
+    - name: Inserting a line after a pattern match 
+
+      lineinfile: 
+
+        path: /etc/sudoers 
+
+        state: present 
+
+        backup: yes 
+
+        line: '### Added below entry for scom monitoring agent' 
+
+        insertbefore: 'scom_local ALL=NOPASSWD: ALL' 
+
+        validate: '/usr/sbin/visudo -cf %s' 
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+cat sysinfo_play.yml 
+
+--- 
+
+- hosts: all 
+
+  tasks: 
+
+    - name: basic system info 
+
+      #shell: lscpu | grep 'Vendor ID'; lscpu | grep 'Model name'; lscpu | grep -i 'CPU MHz'; grep -c 'processor' /proc/cpuinfo;grep 'cpu cores' /proc/cpuinfo |cut -d":" -f2; free -m -h | grep -i mem | cut -c1-20 
+
+      shell: hostname; lscpu | grep 'Vendor ID'; lscpu | grep 'Model name'; lscpu | grep -i 'CPU MHz'; grep -m 1 'processor' /proc/cpuinfo | cut -d$'\t' -f1; grep -c 'processor' /proc/cpuinfo; grep -m 1 'cpu cores' /proc/cpuinfo |cut -d$'\t' -f1; grep 'cpu cores' /proc/cpuinfo |cut -d":" -f2 | awk '{s+=$1} END {print s}'; free -m -h | grep -i mem | cut -c1-20 
+
+      #shell: lscpu | grep 'vendor_id'; lscpu | grep 'Model name'; lscpu | grep -i 'cpu MHz';echo -n 'No. of CPU: '; lscpu | grep -c 'processor'; echo -n 'Core Count: '; lscpu | grep 'cpu cores' |cut -d: -f2 | awk '{s+=$1} END {print s}'; free -m -h | grep -i mem | cut -c1-20; 
+
+      register: system_info 
+
+  
+
+    - debug: var=system_info.stdout_lines 
+
+#grep -m 1 "vendor_id" /proc/cpuinfo; 
+
+#grep -m 1 "model name" /proc/cpuinfo; 
+
+#grep -m 1 "cpu MHz" /proc/cpuinfo; 
+
+#echo -n "No. of CPU: "; grep -c "processor" /proc/cpuinfo; 
+
+#echo -n "Core count: "; grep "cpu cores" /proc/cpuinfo |cut -d":" -f2 | awk '{s+=$1} END {print s}'; 
+
+#echo "scale=2; $(lsblk --nodeps --bytes --noheadings --output SIZE |  awk '{s+=$1} END {print s}') / 1024^3" | bc 
+
+  
+
+  
+
+  
+
+------------------------------------ 
+
+$ cat port_check/ansible.cfg 
+
+[defaults] 
+
+inventory=inventory 
+
+retry_files_enabled = False 
+
+gathering = smart 
+
+host_key_checking = False 
+
+  
+
+  
+
+$ cat port_check/inventory 
+
+[clientservers] 
+
+  
+
+  
+
+$ cat port_check/remote_host_port_check.yml 
+
+--- 
+
+- name: Playbook for checking port status on a remote host 
+
+  hosts: clientservers 
+
+  
+
+  tasks: 
+
+    - name: Check all port numbers are accessible from current host 
+
+      wait_for: 
+
+          host: destinationserver.com 
+
+          port: "{{ item }}" 
+
+          state: started         # Port should be open 
+
+          delay: 0               # No wait before first check (sec) 
+
+          timeout: 3             # Stop checking after timeout (sec) 
+
+      ignore_errors: yes 
+
+      with_items: 
+
+         - 22 
+
+         - 80 
+
+         - 443 
+
+  
+
+------------------------------------------------------------------------ 
+
+  $ cat insert_multiple_lines.yaml 
+
+  --- 
+
+  - name: Playbook for adding multiple lines in a file 
+
+    hosts: serverlist 
+
+    become: true 
+
+    
+
+    tasks: 
+
+      - name: Appending multiple lines in a file 
+
+        blockinfile: 
+
+           path: /etc/profile 
+
+           backup: yes 
+
+           block: | 
+
+              # CHG90903459 
+
+              this is a test line 
+
+              this is a second line 
+
+              this is a third line 
+
+              # CHG09009000 
+
+
+
+
+
+
+  
+
+  
+
+  
+
+ 

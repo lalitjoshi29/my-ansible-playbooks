@@ -1,0 +1,24 @@
+---
+- name: My first playbook in fedora
+  hosts: all
+  become: yes
+  vars:
+    FIRST_NAME = Lalit
+    LAST_NAME = Joshi
+
+  tasks:
+    - name: Print First name
+      debug:
+        msg: "{{ FIRST_NAME }}"
+
+
+    - name: Print Last name
+      debug:
+         msg: "{{ LAST_NAME }}"
+
+    - name: Print Full name
+      debug:
+         msg: "{{ FIRST_NAME }} {{ LAST_NAME }}"
+
+
+

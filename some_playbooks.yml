@@ -1,0 +1,485 @@
+Generate password hash using python 
+
+# python -c 'import crypt,getpass; print crypt.crypt(getpass.getpass())' 
+
+  
+
+[ansadm@ctrl_vm ansible]$ cat playbook_passwdchg.yml 
+
+--- 
+
+ - name: playbook for changing User password on multiple servers 
+
+   hosts: prod 
+
+   become: yes 
+
+   vars_prompt: 
+
+      - name: user_name 
+
+        private: no 
+
+        prompt: "Enter the user name for which password needs to be changed:" 
+
+      - name: user_hashed_pass 
+
+        private: yes 
+
+        prompt: "Enter the password hash genergated by python command:" 
+
+   tasks: 
+
+     - name: user or root password change 
+
+       user: 
+
+          name={{ user_name }} 
+
+          update_password=always 
+
+          password="{{ user_hashed_pass }}" 
+
+[ansadm@ctrl_vm ansible]$ 
+
+  
+
+From <https://mail.google.com/mail/u/0/#sent/QgrcJHsbcVCPPktblLvqVkNmGHmGgBxmFBb>  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+Sudo mgmt 
+
+-------------------- 
+
+  
+
+[ansadm@ctrl_vm ansible]$ cat playbook_sudoadd.yml 
+
+--- 
+
+## Interactive playbook for sudo configuration update 
+
+- name: sudo management playbook 
+
+  hosts: prod 
+
+  gather_facts: true 
+
+  user: ansadm 
+
+  become: yes 
+
+  become_method: sudo 
+
+  vars_prompt: 
+
+     - name: sudo_add 
+
+       private: no 
+
+       prompt: "Enter the sudo entry which need to add" 
+
+       default: "   " 
+
+       tags: add_sudo_entry 
+
+  
+
+  roles: 
+
+     - sudoadd 
+
+[ansadm@ctrl_vm ansible]$ cat roles/sudoadd/tasks/main.yml 
+
+--- 
+
+ - name: Adding sudo entry on {{ ansible_hostname }} 
+
+   lineinfile: 
+
+      path: /etc/sudoers 
+
+      state: present 
+
+      backup: yes 
+
+      regexp: '^{{ sudo_add }}' 
+
+      line: '{{ sudo_add }}' 
+
+      validate: '/usr/sbin/visudo -cf %s' 
+
+   tags: add_sudo_entry 
+
+[ansadm@ctrl_vm ansible]$ 
+
+[ansadm@ctrl_vm ansible]$ 
+
+[ansadm@ctrl_vm ansible]$ 
+
+[ansadm@ctrl_vm ansible]$ 
+
+[ansadm@ctrl_vm ansible]$ cat playbook_sudodel.yml 
+
+--- 
+
+## Interactive playbook for sudo configuration update 
+
+- name: sudo management playbook 
+
+  hosts: prod 
+
+  gather_facts: true 
+
+  user: ansadm 
+
+  become: yes 
+
+  become_method: sudo 
+
+  vars_prompt: 
+
+     - name: sudo_del 
+
+       private: no 
+
+       prompt: "Enter the sudo entry which needs to remove" 
+
+       default: "xyz" 
+
+       tags: remove_sudo_entry 
+
+  
+
+  roles: 
+
+    - sudodel 
+
+[ansadm@ctrl_vm ansible]$ cat roles/sudodel/tasks/main.yml 
+
+--- 
+
+ - name: Removing sudo entry on {{ ansible_hostname }} 
+
+   lineinfile: 
+
+      path: /etc/sudoers 
+
+      backup: yes 
+
+      state: absent 
+
+      regexp: '^{{ sudo_del }}' 
+
+      line: '{{ sudo_del }}' 
+
+      validate: '/usr/sbin/visudo -cf %s' 
+
+   tags: remove_sudo_entry 
+
+[ansadm@ctrl_vm ansible]$ 
+
+[ansadm@ctrl_vm ansible]$ 
+
+[ansadm@ctrl_vm ansible]$ cat playbook_sudosearch.yml 
+
+--- 
+
+## Interactive playbook for sudo configuration update 
+
+- name: sudo management playbook 
+
+  hosts: prod 
+
+  gather_facts: true 
+
+  user: ansadm 
+
+  become: yes 
+
+  become_method: sudo 
+
+  vars_prompt: 
+
+     - name: sudo_find 
+
+       private: no 
+
+       prompt: "Enter the user account which needs to be find in sudoers file" 
+
+       default: "zxc" 
+
+       tags: find_sudo_entry 
+
+  roles: 
+
+    - sudosearch 
+
+[ansadm@ctrl_vm ansible]$ cat roles/sudosearch/tasks/main.yml 
+
+--- 
+
+ - name: search a sudo entry on {{ ansible_hostname }} 
+
+   shell: grep "^{{ sudo_find }}" /etc/sudoers 
+
+   register: sudo_entry_exists 
+
+   ignore_errors: yes 
+
+   failed_when: false 
+
+   changed_when: false 
+
+   tags: find_sudo_entry 
+
+ - debug: 
+
+     msg: > 
+
+         " {{ sudo_find }} exists in sudoers file of {{ ansible_hostname }}" 
+
+   when: sudo_entry_exists.rc == 0 
+
+   tags: find_sudo_entry 
+
+ - debug: 
+
+     msg: > 
+
+         " {{ sudo_find }} does not exist in sudoers file of {{ ansible_hostname }}" 
+
+   when: sudo_entry_exists.rc != 0 
+
+   tags: find_sudo_entry 
+
+[ansadm@ctrl_vm ansible]$ 
+
+[ansadm@ctrl_vm ansible]$ 
+
+  
+
+From <https://mail.google.com/mail/u/0/#sent/FFNDWMthdtvHhQzwwQkFftqrgxlJWNGZ>  
+
+  
+
+--- 
+
+- hosts: all 
+
+  gather_facts: false 
+
+  vars: 
+
+   - usernames: "{{ user_name_lists}}" 
+
+  tasks: 
+
+   - name: GetUserInfo 
+
+     shell: egrep "^{{ item }}:" /etc/passwd 
+
+     ignore_errors: yes 
+
+     with_items: 
+
+          - "{{ usernames }}" 
+
+     register: user_info 
+
+  
+
+   - name: ChangeUserPassord 
+
+     user: name="{{ item.item }}" password="{{ new_password }}" update_password=always 
+
+     when: item.rc == 0 
+
+     with_items: "{{ user_info.results }}" 
+
+  
+
+========================================= 
+
+  
+
+  
+
+[myadmin@server1 ansible]$ cat playbook_passwdchg.yml 
+
+--- 
+
+ - name: playbook for changing User password on multiple servers 
+
+   hosts: testserver 
+
+   user: myadmin 
+
+   become: yes 
+
+  
+
+   vars_prompt: 
+
+       - name: user_name 
+
+         private: no 
+
+         prompt: "Enter the user name for which password needs to be changed:" 
+
+  
+
+       - name: user_hashed_pass 
+
+         private: yes 
+
+         prompt: "Enter the password hash genergated by python command:" 
+
+  
+
+   tasks: 
+
+      - name: Get user info 
+
+        shell: egrep "^{{ user_name }}:" /etc/passwd 
+
+        ignore_errors: yes 
+
+        register: user_info 
+
+  
+
+      - name: user or root password change 
+
+        user: 
+
+           name={{ user_name }} 
+
+           update_password=always 
+
+           password="{{ user_hashed_pass }}" 
+
+        when: user_info.rc == 0 
+
+  
+
+  
+
+  
+
+####### python -c 'import crypt,getpass; print crypt.crypt(getpass.getpass())'  ##### 
+
+[myadmin@server1 ansible]$ 
+
+  
+
+  
+
+  
+
+========================================== 
+
+[myadmin@server1 ansible]$ cat playbook_sudosearch.yml 
+
+--- 
+
+## Interactive playbook for sudo configuration update 
+
+ - name: sudo management playbook 
+
+   hosts: all 
+
+   serial: 1 
+
+   ignore_errors: yes 
+
+   gather_facts: true 
+
+   user: myadmin 
+
+   become: yes 
+
+   become_method: sudo 
+
+   vars: 
+
+     - sudo_out_dir: /var/tmp 
+
+   vars_prompt: 
+
+       - name: sudo_find 
+
+         private: no 
+
+         prompt: "Enter the user account which needs to be find in sudoers file" 
+
+         #default: "zxc" 
+
+         tags: find_sudo_entry 
+
+  
+
+   roles: 
+
+      - sudosearch 
+
+  
+
+  
+
+[myadmin@server1 ansible]$ cat roles/sudosearch/tasks/main.yml 
+
+--- 
+
+ - name: search a sudo entry in /etc/sudoers file of {{ ansible_hostname }} 
+
+   shell: if grep "{{ sudo_find }}" /etc/sudoers > /dev/null; then echo "user_exists_on_the_server"; else echo "user_does_not_exist_on_the_server"; fi 
+
+   register: sudo_entry_exists 
+
+   ignore_errors: yes 
+
+   tags: find_sudo_entry 
+
+  
+
+ - name: write data to a file under {{ sudo_out_dir }} of control node if entry exists 
+
+   become: no 
+
+   lineinfile: 
+
+       path: "{{ sudo_out_dir }}/sudofind-{{ ansible_date_time.date }}.txt" 
+
+       backup: no 
+
+       state: present 
+
+       create: yes 
+
+       line: "{{ sudo_find }} {{ sudo_entry_exists.stdout }} {{ ansible_hostname }}" 
+
+   when: sudo_entry_exists.stdout == "user_exists_on_the_server" 
+
+   delegate_to: localhost 
+
+   tags: find_sudo_entry 
+
+  
+
+  
+
+  
+
+ 
