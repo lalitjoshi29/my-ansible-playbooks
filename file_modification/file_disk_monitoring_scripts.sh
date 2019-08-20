@@ -640,13 +640,13 @@ if [ -s "$SERVER1_OUTPUT_FILE" ] && [ -s "$SERVER2_OUTPUT_FILE" ]
 
 then 
 
-   /bin/sdiff -s $SERVER1_OUTPUT_FILE $SERVER2_OUTPUT_FILE | sed 's/\x1b\[[0-9;]*m//g' >> $DIFF_FILE 
+   /bin/sdiff -s $SERVER1_OUTPUT_FILE $SERVER2_OUTPUT_FILE | sed 's/\x1b\[[0-9;]*m//g' > $DIFF_FILE 
 
    if [ -s "$DIFF_FILE" ] 
 
       then 
 
-         sed -i "1s/^/${SERVER1},\t\t\t\t\t\t\t${SERVER2}/" $DIFF_FILE 
+         sed -i "1s/^/${SERVER1},\t\t\t\t\t\t\t${SERVER2}\n/" $DIFF_FILE 
 
          /bin/mutt -s "Alert !!! file differences found." $MAILING_LIST < $DIFF_FILE 
 
