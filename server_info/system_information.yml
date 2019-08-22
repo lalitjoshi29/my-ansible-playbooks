@@ -9,8 +9,6 @@
       shell: hostname; lscpu | grep 'Vendor ID'; lscpu | grep 'Model name'; lscpu | grep -i 'CPU MHz'; grep -m 1 'processor' /proc/cpuinfo | cut -d$'\t' -f1; grep -c 'processor' /proc/cpuinfo; grep -m 1 'cpu cores' /proc/cpuinfo |cut -d$'\t' -f1; grep 'cpu cores' /proc/cpuinfo |cut -d":" -f2 | awk '{s+=$1} END {print s}'; free -m -h | grep -i mem | cut -c1-20
       register: system_info
 
-
-
     - debug: var=system_info.stdout_lines
 
 #grep -m 1 "vendor_id" /proc/cpuinfo; 
