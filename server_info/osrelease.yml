@@ -1,0 +1,14 @@
+### $ cat osrelease.yml
+---
+  - hosts: all
+    tasks:
+     - name: Check the OS release version
+       shell: uname -a|awk -F " " ' {print $3 }'
+       register: osrelease
+
+     - name: Saving the data to the local file
+       copy:
+        content: "{{ osrelease.stdout }}"
+        dest: /home/autoadmin/releasecollection
+       delegate_to: localhost
+

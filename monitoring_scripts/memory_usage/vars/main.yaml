@@ -1,0 +1,5 @@
+---
+mail_recipient: xyz@abc.com
+mail_from: 123@abc.com
+mail_bcc: 345@abc.ocm
+

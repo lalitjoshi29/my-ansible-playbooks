@@ -1,0 +1,12 @@
+### $ cat playbook_copy_file_dir.yml
+---
+- name: Copy the file/dir to the remote servers
+  hosts: serverlist
+  become: yes
+
+  tasks:
+    - name: Copy the SEP dir
+      copy:
+         src: /home/autoadmin/SEP
+         dest: /home/autoadmin/
+

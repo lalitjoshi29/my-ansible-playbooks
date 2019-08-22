@@ -1,0 +1,67 @@
+### $ cat playbook_memory_usage_alert.yaml
+---
+- name: Memory usage alert playbook
+  hosts: all
+ # hosts: serverlist
+ # hosts: UAT
+  vars_files:
+     - vars/main.yml
+
+  tasks:
+    - name: Running Memory usage script on remote RHEL hosts
+      script: /etc/ansible/memory_usage/rhel_memory_usage_alert_script.sh
+      when: ansible_os_family == "RedHat"
+
+
+    - name: Running Memory usage script on remote Ubuntu hosts
+      script: /etc/ansible/memory_usage/ubuntu_memory_usage_alert_script.sh
+      when: ansible_os_family == "Debian"
+
+
+    - name: Checking if file for memory usage details exists
+      stat:
+         path: /tmp/{{ ansible_hostname }}_memory_usage_details.txt
+      register: memory_details_file
+
+
+    - name: Copying details from remote hosts to ansible server
+      fetch:
+        src: /tmp/{{ ansible_hostname }}_memory_usage_details.txt
+        dest: /var/tmp/memory_usage_data/
+        flat: yes
+      when: memory_details_file.stat.exists
+
+
+    - name: Sending mail alerts to Unix team
+      local_action:
+         module: mail
+         host: localhost
+         port: 25
+         to: "{{ mail_recipient }}"
+         bcc: "{{ mail_bcc }}"
+         subject: "High memory usage on Linux Server"
+         body: "{{ lookup('file', '{{ item }}') }}"
+         from: "{{ mail_from }}"
+      with_fileglob:
+             - "/var/tmp/memory_usage_data/*"
+      become: no
+      run_once: yes
+
+
+    - name: Cleaning up directory
+      file:
+         path: "{{ item }}"
+         state: absent
+      with_fileglob:
+         - "/var/tmp/memory_usage_data/*"
+      delegate_to: localhost
+      run_once: yes
+
+
+    - name: Cleaning up temp memory usage details file on remote servers
+      file:
+         path: /tmp/{{ ansible_hostname }}_memory_usage_details.txt
+         state: absent
+      when: memory_details_file.stat.exists
+
+

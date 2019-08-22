@@ -1,0 +1,18 @@
+###$ cat insert_multiple_lines.yaml
+---
+- name: Playbook for adding multiple lines in a file
+  hosts: serverlist
+  become: true
+
+  tasks:
+    - name: Appending multiple lines in a file
+      blockinfile:
+         path: /etc/profile
+         backup: yes
+         block: |
+            # CHG9009000
+            this is a test line
+            this is a second line
+            this is a third line
+            # CHG09009000
+
