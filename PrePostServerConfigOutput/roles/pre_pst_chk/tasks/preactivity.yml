@@ -1,0 +1,20 @@
+## This task will take backup of system configuration
+- name: Take system config backup
+  script: "{{ role_path }}/files/linux_config_backup.sh"
+
+## This task will take system config output in a file
+- name: Take system output in a file -Pre Implementation
+  script: "{{ role_path }}/files/linux_output.sh >> /var/tmp/PRE_{{ ansible_hostname }}_system_info_output_{{ ansible_date_time.date }}.txt"
+  register: system_out
+
+## This task will send system_info_output to a receipient via mail
+- name: send system_info_output to a receipient through mail - Pre Implementation
+  mail:
+    host: localhost
+    port: 25
+    to: "{{ mail_recipient }}"
+    subject: "Linux server {{ ansible_hostname }} Ouput file"
+    body: 'PRE Implementation - System {{ ansible_hostname }} basic information file'
+    attach: /var/tmp/PRE_{{ ansible_hostname }}_system_info_output_{{ ansible_date_time.date }}.txt
+  when: system_out.rc == 0
+

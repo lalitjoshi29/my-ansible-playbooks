@@ -1,0 +1,15 @@
+## This task will take system config output in a file
+- name: Take system output in a file - POST implementation
+  script: "{{ role_path }}/files/linux_output.sh >> /var/tmp/POST_{{ ansible_hostname }}_system_info_output_{{ ansible_date_time.date }}.txt"
+  register: system_out
+
+## This task will send system_info_output to a receipient via mail
+- name: send system_info_output to a receipient through mail - POST implementation
+  mail:
+    host: localhost
+    port: 25
+    to: "{{ mail_recipient }}"
+    subject: "Linux server {{ ansible_hostname }} Ouput file"
+    body: 'POST Implementation - System {{ ansible_hostname }} basic information file'
+    attach: /var/tmp/POST_{{ ansible_hostname }}_system_info_output_{{ ansible_date_time.date }}.txt
+  when: system_out.rc == 0

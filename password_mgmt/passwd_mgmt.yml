@@ -10,33 +10,18 @@
 ### Playbook 
 
 ##  cat /etc/ansible/playbook_userpasschng.yml 
-
-  
-
 --- 
-
 - name: playbook for changing root or user password on multiple servers 
+  hosts: all 
+  become: yes 
 
-   hosts: all 
-
-   become: yes 
-
-   vars_files:  
-
+  vars_files:  
       - update_userpass.yml 
 
-  
-
-   tasks: 
-
+  tasks: 
      - name: user or root password change 
-
        user:  
-
           name={{ user_name }} 
-
           update_password=always 
-
           password="{{ user_hashed_pass }}" 
-
   

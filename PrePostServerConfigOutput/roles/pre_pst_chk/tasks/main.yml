@@ -1,0 +1,10 @@
+## Pre Activity tasks - take config backup and send output to unix team
+- import_tasks: preactivity.yml
+  tags:
+    - pre_chk
+
+## Post activity tasks
+- import_tasks: postactivity.yml
+  tags:
+    - post_chk
+

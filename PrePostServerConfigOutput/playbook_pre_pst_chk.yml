@@ -1,0 +1,10 @@
+---
+###Ansible playbook to take system config output/backup before and after the activity on RHEL servers
+- name: Ansible playbook -System Config and Backup - Pre and Post implementation
+  hosts: serverlist
+  user: autoadmin
+  become: yes
+
+  roles:
+    - pre_pst_chk
+
