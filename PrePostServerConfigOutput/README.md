@@ -6,6 +6,7 @@ first update the inventory with hostname/IP of the servers
 There are two tags in this playbook.
 * To list tags: 
 	* ansible-playbook playbook_pre_pst_chk.yml --list-tags
+                                                               
           TASK TAGS: [post_chk, pre_chk]
 
 * For taking server output before activity run playbook as below:
