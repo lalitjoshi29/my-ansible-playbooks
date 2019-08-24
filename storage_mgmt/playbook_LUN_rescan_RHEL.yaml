@@ -1,0 +1,19 @@
+---
+- name: LUN rescan in Linux
+  hosts: all
+  user: autoadmin
+  become: yes
+
+
+  tasks:
+   - name: Find /sys/class/scsi_host/hostX softlinks
+     find:
+       path: '/sys/class/scsi_host'
+       file_type: link
+       pattern: 'host*'
+     register: hosts_reg
+
+   - name: rescanning new disks
+     shell: 'echo "- - -" > {{ item.path }}/scan'
+     with_items: "{{ hosts_reg.files }}"
+

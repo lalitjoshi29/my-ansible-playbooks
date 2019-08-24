@@ -1,0 +1,17 @@
+---
+  - name: Playbook for installing a local rpm to multiple servers
+    hosts: all
+    become: yes
+    remote_user: autoadmin
+
+    tasks:
+       - name: Copy rpm file to server
+         copy:
+           src: /var/tmp/scx-1.5.1-216.rhel.6.x64.rpm
+           dest: /var/tmp/scx-1.5.1-216.rhel.6.x64.rpm
+
+       - name: Install rpm package
+         yum:
+           name: /var/tmp/scx-1.5.1-216.rhel.6.x64.rpm
+           state: present
+

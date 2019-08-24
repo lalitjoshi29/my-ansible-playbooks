@@ -1,0 +1,17 @@
+---
+- name: Add a line before a matching pattarn
+  hosts: all
+  become: yes
+  remote_user: autoadmin
+
+  tasks:
+    - name: Inserting a line before a pattern match
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        backup: yes
+        line: '### Added below entry for scom monitoring agent'
+        insertbefore: 'scom_local ALL=NOPASSWD: ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+
+
