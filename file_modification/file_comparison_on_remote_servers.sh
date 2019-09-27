@@ -1,12 +1,11 @@
+#!/bin/bash
 #################################################################################
 ##
 ## This script is used for comparing same files located on two different servers
 ## It will compare file size and Modification date only. 
 ##
-## $ cat compare_file_stat.sh 
+## compare_file_stat.sh
 #################################################################################
-
-#!/bin/bash 
 
 SERVER1_OUTPUT_FILE=/var/tmp/server1_file_modify_time.txt 
 

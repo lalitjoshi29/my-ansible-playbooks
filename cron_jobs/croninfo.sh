@@ -1,6 +1,6 @@
-### cat croninfo.sh 
+#!/bin/bash
+### croninfo.sh
 
-#!/bin/bash 
 CRONDIR=/var/spool/cron
 echo " "
 hostname

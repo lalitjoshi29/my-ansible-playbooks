@@ -1,6 +1,4 @@
-#######################################################
-#!/bin/bash 
-#
+#!/bin/bash
 #################
 SERVER_LIST=/var/tmp/testdev_server_list.txt 
 INPUT_SCRIPT=/etc/scripts/disk_usage_alert.sh 

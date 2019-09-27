@@ -52,15 +52,10 @@
 ##
 #  
 #
-
-
-# [ansadm@server1 ansible]$ cat sys_mgmt/hosts 
-
-[localserver] 
-
-localhost       ansible_connection=local 
-
-#  
+# [ansadm@server1 ansible]$ cat sys_mgmt/hosts
+[localserver]
+localhost       ansible_connection=local
+#
 #
 #  
 #
@@ -71,104 +66,53 @@ localhost       ansible_connection=local
 #  
 #
 # [ansadm@server1 ansible]$ cat sys_mgmt/script_usrmgmt.sh 
-
-#!/bin/bash 
-
-GROUP_VAR_PATH="/etc/ansible/sys_mgmt/group_vars" 
-
-SYS_MGMT_PATH="/etc/ansible/sys_mgmt" 
-
-  
+#!/bin/bash
+GROUP_VAR_PATH="/etc/ansible/sys_mgmt/group_vars"
+SYS_MGMT_PATH="/etc/ansible/sys_mgmt"
 
 while true 
-
-do 
-
-  
-
-        echo -e "Please select from below tasks \n" 
-
-        echo -e "1. Add a user \n" 
-
-        echo -e "2. Delete a user \n" 
-
-        echo -e "3. Search a user \n" 
-
-        echo -e "0. Exit \n" 
-
-  
-
-        read choice 
-
-  
+do
+        echo -e "Please select from below tasks \n"
+        echo -e "1. Add a user \n"
+        echo -e "2. Delete a user \n"
+        echo -e "3. Search a user \n"
+        echo -e "0. Exit \n"
+        read choice
 
 case $choice in 
+        0)
+        break
+        ;;
 
-        0) 
-
-        break 
-
-        ;; 
-
-  
-
-        1) 
-
-        echo -e 'Enter user name which needs to be created' 
-
-        read newuser_name 
-
-  
+        1)
+        echo -e 'Enter user name which needs to be created'
+        read newuser_name
 
         echo -e 'Enter user id for user' 
-
-        read newuser_id 
-
-  
+        read newuser_id
 
         echo -e 'Enter comments' 
+        read newuser_comments
 
-        read newuser_comments 
+        echo -e 'Enter shell'
+        read newuser_shell
 
-  
-
-        echo -e 'Enter shell' 
-
-        read newuser_shell 
-
-  
 
         ## modifying user creation variable file as per the requirement 
+        cat $GROUP_VAR_PATH/user_create_orig.yml | sed "s/usrname/$newuser_name/g" | sed "s/usrid/$newuser_id/g" | sed "s/cmts/$newuser_comments/g" | sed "s/usrshell/$newuser_shell/g" > $GROUP_VAR_PATH/user_create_var.yml
 
-        cat $GROUP_VAR_PATH/user_create_orig.yml | sed "s/usrname/$newuser_name/g" | sed "s/usrid/$newuser_id/g" | sed "s/cmts/$newuser_comments/g" | sed "s/usrshell/$newuser_shell/g" > $GROUP_VAR_PATH/user_create_var.yml 
-
-  
-
-  
-
-        #Running ansible playbook 
-
-        /bin/ansible-playbook $SYS_MGMT_PATH/playbook_usermgmt.yml -i $SYS_MGMT_PATH/hosts -b  -t user_create 
-
-        ;; 
-
-  
+        #Running ansible playbook
+        /bin/ansible-playbook $SYS_MGMT_PATH/playbook_usermgmt.yml -i $SYS_MGMT_PATH/hosts -b  -t user_create
+        ;;
 
         2) 
+        echo -e 'Enter user name which needs to be deleted'
+        read olduser_name
 
-        echo -e 'Enter user name which needs to be deleted' 
-
-        read olduser_name 
-
-  
-
-        cat $GROUP_VAR_PATH/user_remove_orig.yml | sed "s/usrname/$olduser_name/g"  > $GROUP_VAR_PATH/user_remove_var.yml 
-
-  
+        cat $GROUP_VAR_PATH/user_remove_orig.yml | sed "s/usrname/$olduser_name/g"  > $GROUP_VAR_PATH/user_remove_var.yml
 
         #Running ansible playbook 
-
-        /bin/ansible-playbook $SYS_MGMT_PATH/playbook_usermgmt.yml -i $SYS_MGMT_PATH/hosts -b  -t user_delete 
+        /bin/ansible-playbook $SYS_MGMT_PATH/playbook_usermgmt.yml -i $SYS_MGMT_PATH/hosts -b  -t user_delete
 
         #sleep 4 
 

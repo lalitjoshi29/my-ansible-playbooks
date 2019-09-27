@@ -1,12 +1,10 @@
-####[lalit@example scripts]$ cat disk_usage_alert.sh 
+#!/bin/bash
+## disk_usage_alert.sh
 ##
-#!/bin/sh 
-#
-# set -x 
+# set -x
 #
 # Shell script to monitor or watch the disk space 
 #################################################################
-
 
 # set alert level 85% is default 
 ALERT=85 
@@ -27,8 +25,6 @@ function main_prog() {
 
 #################
 
-
 df -PHT | grep -vE "^Filesystem|tmpfs|cdrom|nfs|cifs" | awk '{print $6 " " $7}' | main_prog 
-
 
 ####################################################################
