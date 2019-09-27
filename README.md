@@ -13,6 +13,13 @@ I have created some playbooks on:
 	* Create an encrypted password using python
 	* Change passoword for a user
 * OS patching playbook and scripts
+    * Take important configuration backup and output before activity
+    * Application status check (running or stopped)
+    * Send Notification to app team if application is still running
+    * Check for the updates
+    * Deploy latest updates if available
+    * Reboot the server if required
+    * Take important configuration file's output
 * Resource monitoring scripts
 	* Disk usage alert
 	* Memory usage alert
