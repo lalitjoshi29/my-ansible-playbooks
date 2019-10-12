@@ -1,0 +1,49 @@
+---
+- name: List all local accounts on given servers
+  hosts: serverlist
+
+  vars:
+    ACCTINFO: local_account_{{ ansible_hostname }}.txt
+
+  tasks:
+    - name: Task1 - Fetching information for local accounts ....
+      script: /etc/ansible/user_mgmt/list_users.sh >> /var/tmp/{{ ACCTINFO }}
+
+    - name: Task2 - Fetching remote account info to control node's '/var/tmp/local_acctinfo' directory ....
+      fetch:
+        src: /var/tmp/{{ ACCTINFO }}
+        dest: /var/tmp/local_acctinfo/{{ ACCTINFO }}
+        flat: yes
+
+    - name: Task3 - Creating a consolidated report under '/var/tmp/local_acctinfo/report/' directory ....
+      assemble:
+        src: /var/tmp/local_acctinfo
+        dest: /var/tmp/local_acctinfo/report/local_user_report_allservers.txt
+        owner: ansadm
+        delimiter: '#########################################'
+      delegate_to: localhost
+      run_once: true
+
+    - name: Task4 - Cleaning up temporary files on remote servers ....
+      file:
+        path: /var/tmp/{{ ACCTINFO }}
+        state: absent
+
+    - name: Task5 - Cleaning up the files under '/var/tmp/local_acctinfo/' on control node ....
+      find:
+        paths: /var/tmp/local_acctinfo
+        patterns: '*.txt'
+      register: files_to_delete
+      delegate_to: localhost
+      run_once: true
+
+    - name: Task6 - Deleting temp files '/var/tmp/local_acctinfo/*.txt' on control node ....
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ files_to_delete.files }}"
+      delegate_to: localhost
+      run_once: true
+
+
+
