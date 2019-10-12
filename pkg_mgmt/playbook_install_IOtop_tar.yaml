@@ -1,0 +1,28 @@
+---
+- name: Installation of IOtop on remote servers
+  hosts: serverlist
+  become: yes
+
+  tasks:
+    - name: copy and extract tar file on remote servers
+      unarchive:
+        src: /var/tmp/SW/iotop-0.6.tar.bz2
+        dest: /tmp
+      tags:
+        - untar_archive
+
+    - name: Execute the scripts
+      command: "{{ item }} chdir=/tmp/iotop-0.6"
+      with_items:
+        - ./setup.py install
+
+    - name: Remove temporary installation files
+      file:
+        path: /tmp/iotop-0.6
+        state: absent
+
+    - name: Verify the package installation
+      command: iotop --version
+      register: response
+
+    - debug: msg="{{ response.stdout }}"

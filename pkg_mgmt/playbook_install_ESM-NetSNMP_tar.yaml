@@ -1,0 +1,28 @@
+---
+- name: Installation of ESM-NetSNMP on remote servers
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: copy and extract tar file on remote servers
+      unarchive:
+        src: /var/tmp/NetSNMP/ESM-NetSNMP-current.tar
+        dest: /tmp
+
+    - name: Execute the scripts
+      command: "{{ item }} chdir=/tmp/ESM-NetSNMP"
+      with_items:
+        - ./ESMinst
+
+    - name: Remove temporary installation files
+      file:
+        path: /tmp/ESM-NetSNMP
+        state: absent
+
+    - name: Verify the package installation
+      command: /usr/local/bin/ESM-version
+      register: response
+
+    - debug: msg="{{ response.stdout }}"
+
+
