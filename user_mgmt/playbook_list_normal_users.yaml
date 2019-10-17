@@ -1,12 +1,12 @@
 ---
-- name: List all local accounts on given servers
+- name: List all locally created regular accounts on given servers
   hosts: serverlist
 
   vars:
     ACCTINFO: local_account_{{ ansible_hostname }}.txt
 
   tasks:
-    - name: Task1 - Fetching information for local accounts ....
+    - name: Task1 - Fetching information for locally created regular accounts ....
       script: /etc/ansible/user_mgmt/list_users.sh >> /var/tmp/{{ ACCTINFO }}
 
     - name: Task2 - Fetching remote account info to control node's '/var/tmp/local_acctinfo' directory ....

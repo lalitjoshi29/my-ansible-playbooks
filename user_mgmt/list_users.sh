@@ -1,5 +1,5 @@
 #!/bin/bash
-# Purpose:  List all normal users
+# Purpose:  List all locally created regular users
 # 
 echo " "
 echo " "
