@@ -1,0 +1,14 @@
+### Inventory file 
+[devservers] 
+devserver1 
+devserver2 
+devserver3 
+devserver4 
+
+[testservers] 
+testserver1 
+testserver2 
+
+[webservers] 
+webnode1 
+webnode2 

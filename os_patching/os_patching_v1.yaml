@@ -1,0 +1,58 @@
+--- 
+- name: os patching playbook 
+  hosts: devservers 
+  gather_facts: yes 
+  user: ansadm 
+  become: yes 
+  serial: 2    ##The serial keyword can be used to limit the number of hosts that the playbook runs on at once. 
+
+  tasks: 
+   - name: verify application/database processes are not running 
+     shell: if ps -eaf | egrep 'apache|http|pmon|smon'|grep -v grep > /dev/null ;then echo 'process_running';else echo 'process_not_running';fi 
+     ignore_errors: true 
+     register: app_process_check 
+
+   - name: decision point to start patching 
+     fail: msg="{{ inventory_hostname }} have running Application. Please stop the application first, then attempt patching." 
+     when: app_process_check.stdout == "process_running" 
+
+   - name: refresh subscription-manager and sync repositories 
+     shell: /usr/bin/subscription-manager refresh; /usr/bin/yum clean all; /usr/bin/yum repolist 
+     ignore_errors: true 
+     when: ansible_distribution == 'Red Hat Enterprise Linux' 
+
+   - name: upgrade all packages on the server 
+     yum: 
+       name="*" 
+       state=latest 
+       #security=yes    ##only installs updates that have been marked security related. 
+       #update_cache=yes 
+     when: app_process_check.stdout == "process_not_running" and ansible_distribution == 'Red Hat Enterprise Linux' 
+     register: yum_update 
+
+    - name: check if reboot required after kernel update. 
+      shell: KERNEL_NEW=$(rpm -q –last kernel |head -1 | awk '{print $1}' | sed 's/kernel-//'); KERNEL_NOW=$(uname -r); if [[ $KERNEL_NEW != $KERNEL_NOW ]]; then echo "reboot_needed"; else echo "reboot_not_needed"; fi 
+      ignore_errors: true 
+      register: reboot_required 
+
+    - name: restart system 
+      command: shutdown -r +1 "Rebooting System After Patching" 
+      async: 0 
+      poll: 0 
+      when: reboot_required.stdout == "reboot_needed" 
+      register: reboot_started 
+      ignore_errors: true 
+
+    - name: pause for three minutes 
+      pause: 
+        minutes: 3 
+
+    - name: check if system responding to ssh 
+      local_action: 
+         module: wait_for 
+           host={{ inventory_hostname }} 
+           port=22 
+           delay=15 
+           timeout=300 
+           state=started 
+      when: reboot_started|changed 
