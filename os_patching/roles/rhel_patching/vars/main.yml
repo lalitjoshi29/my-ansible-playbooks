@@ -1,0 +1,6 @@
+---
+# vars file for rhel_patching
+mail_recipient: lalitjoshi@xyz.com
+
+
+#app_mail_recipient: app.team@xyz.com

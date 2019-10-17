@@ -1,0 +1,8 @@
+- name: Ansible playbook for OS patching on RHEL servers
+  hosts: all
+  user: ansadm
+  become: yes
+  
+  roles:
+    - rhel_patching
+

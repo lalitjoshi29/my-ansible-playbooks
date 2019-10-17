@@ -1,0 +1,67 @@
+---
+## Pre Activity task - Take config backup and send output to UNIX team
+
+- import_tasks: preactivity.yml
+  tags:
+    - pre_chk
+
+- name: Verify application/database processes are not running....
+  shell: if ps -eaf | egrep 'pmon|smon|apache|http' | grep -v grep > /dev/null; then echo "process_running"; else echo "process_not_running"; fi
+  ignore_errors: true
+  register: app_process_check
+  tags: 
+    - patch_deploy
+
+- name: Send mail to UNIX team to stop application if not stopped yet....
+  mail: 
+    host: localhost
+    port: 25
+    to: "{{ mail_recipient }}"
+    subject: "Application still running, please stop it"
+    body: 'Application still running on the server {{ ansible_hostname }}. Please stop the proccess before proceeding further.'
+    when: app_process_check.stdout == "process_running"
+    tags:
+      - patch_deploy
+
+- name: Decision point to start patching, Stop patching if application is still running....
+  fail: msg="{{ inventory_hostname }} has running application. Please stop the application first then attempt patching."
+  when: app_process_check.stdout == "process_running"
+  tags:
+    - patch_deploy
+
+- name: Refreshing subscription....
+  shell: subscription manager refresh 
+  tags: 
+    - patch_deploy
+
+- name: Updating all pacakges on the server....
+  yum: 
+    name: "*"
+    state: latest
+    update_cache: yes
+  when: app_process_check.stdout == "process_not_running" and ansible_distribution == "RedHat"
+  register: yum_update
+  tags: 
+    - patch_deploy
+
+- name: Check if reboot required after kernel update (in case of newer kernel installed)
+  shell: KERNEL_NEW=$(rpm -q --last kernel | head -1 | awk '{ print $1 }'| sed 's/kernel-//'); KERNEL_NOW=$(uname -r); if [[ $KERNEL_NEW != $KERNEL_NOW ]]; then echo "reboot_required"; else echo "reboot_not_required"; fi
+  ignore_errors: true
+  register: reboot_needed
+  tags: 
+    - patch_deploy
+
+- name: Restarting the system....
+  reboot:
+    reboot_timeout: 600
+    test_command: uptime
+  when: reboot_needed.stdout == "reboot_required"
+  ignore_errors: true
+  tags: 
+    - patch_deploy
+
+## Post patching tasks
+- import_tasks: postactivity.yml
+  tags:
+    - post_chk
+

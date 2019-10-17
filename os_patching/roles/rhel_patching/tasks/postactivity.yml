@@ -1,0 +1,14 @@
+- name: Take output of important system configuration in a file - POST patching
+  script: "{{ role_path }}/files/linux_output.sh >> /var/tmp/POST_{{ ansible_hostname }}_system_info_output_{{ ansible_date_time.date }}.txt"
+  register: system_out
+
+- name: Send system_info_output to a receipient through mail - POST patching
+  mail:
+    host: localhost
+    port: 25
+    to: "{{ mail_recipient }}"
+    subject: "POST Patching - Linux server {{ ansible_hostname }} Ouput file"
+    body: 'POST PATCHING - System {{ ansible_hostname }} basic information file'
+    attach: /var/tmp/POST_{{ ansible_hostname }}_system_info_output_{{ ansible_date_time.date }}.txt
+  when: system_out.rc == 0
+
