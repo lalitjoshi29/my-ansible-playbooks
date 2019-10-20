@@ -1,0 +1,4 @@
+---
+# vars file: defining mail recipient in a variable
+mail_recipient: abc@xyz.com
+

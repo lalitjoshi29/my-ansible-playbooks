@@ -1,0 +1,8 @@
+- name: Ansible playbook for OS patching on amazon Linux servers
+  hosts: all
+  user: devops
+  become: yes
+  
+  roles:
+    - amzn_patching
+

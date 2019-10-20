@@ -21,7 +21,7 @@
     body: 'Application still running on the server {{ ansible_hostname }}. Please stop the proccess before proceeding further.'
   when: app_process_check.stdout == "process_running"
   tags:
-      - patch_deploy
+    - patch_deploy
 
 - name: Decision point to start patching, Stop patching if application is still running....
   fail: msg="{{ inventory_hostname }} has running application. Please stop the application first then attempt patching."
@@ -29,17 +29,12 @@
   tags:
     - patch_deploy
 
-- name: Refreshing subscription....
-  shell: subscription manager refresh 
-  tags: 
-    - patch_deploy
-
 - name: Updating all pacakges on the server....
   yum: 
     name: "*"
     state: latest
     update_cache: yes
-  when: app_process_check.stdout == "process_not_running" and ansible_distribution == "RedHat"
+  when: app_process_check.stdout == "process_not_running" and ansible_distribution == "Amazon"
   register: yum_update
   tags: 
     - patch_deploy
@@ -64,4 +59,5 @@
 - import_tasks: postactivity.yml
   tags:
     - post_chk
+
 

@@ -5,8 +5,8 @@ BACKUP_DIR=/var/tmp/backup/`hostname`_$NOW
 [ ! -d $BACKUP_DIR ] && mkdir -p $BACKUP_DIR
 
 ### Backup of Basic system configuration
-cp -p /etc/redhat-release $BACKUP_DIR/redhat-release_$NOW
 cp -p /etc/os-release $BACKUP_DIR/os-release_$NOW
+cp -p /etc/system-release $BACKUP_DIR/system-release_$NOW
 cat /proc/cpuinfo > $BACKUP_DIR/cpuinfo_$NOW
 cat /proc/meminfo > $BACKUP_DIR/meminfo_$NOW
 cat /proc/swaps > $BACKUP_DIR/swaps_$NOW
