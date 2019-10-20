@@ -1,4 +1,8 @@
 ---
+### Generate keys for devops user before executing this playbook. 
+### $ ssh-keygen 
+###
+
 - name: Public key based access to managed hosts for Ansible Lab
   hosts: all
 
