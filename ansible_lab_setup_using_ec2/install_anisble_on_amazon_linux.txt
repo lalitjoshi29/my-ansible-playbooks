@@ -1,0 +1,5 @@
+
+ansible is available in Amazon Linux Extra topic "ansible2"
+
+To use, run
+# sudo amazon-linux-extras install ansible2

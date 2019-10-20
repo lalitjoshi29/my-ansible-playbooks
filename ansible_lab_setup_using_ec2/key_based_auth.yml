@@ -1,0 +1,16 @@
+---
+- name: Public key based access to managed hosts for Ansible Lab
+  hosts: all
+
+  tasks:
+    - name: Ensure key is in user's ~/.ssh/authorized_keys2
+      authorized_key:
+          user: devops
+          state: present
+          key: '{{ item }}'
+      with_file:
+          - ~/.ssh/id_rsa.pub
+
+####            
+###  --------- To execute playbook, run below command -------------
+###  $ ansible-playbook playbook_passwdless_setup.yaml  -i inventory --ask-pass
