@@ -2,11 +2,11 @@
 Ansible playbooks and bash scripts created by Lalit Joshi
 
 I have created some playbooks on:
-* User Management - (Status - Pending)
+* User Management - (Status - Work in progress)
 	* add a user
 	* remove a user
 	* user modification
-* Sudo management - (Status - Pending)
+* Sudo management - (Status - Work in progress)
 	* Add a sudo entry in /etc/sudoers file
 	* Remove a sudo entry from /etc/sudoers file
 * Password Management
