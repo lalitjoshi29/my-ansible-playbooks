@@ -1,0 +1,4 @@
+web_server: apache2
+firewall_pkg: ufw
+web_service: apache2
+

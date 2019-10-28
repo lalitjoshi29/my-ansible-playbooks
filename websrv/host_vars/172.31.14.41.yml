@@ -1,0 +1,4 @@
+web_server: httpd
+firewall_pkg: firewalld
+web_service: httpd
+

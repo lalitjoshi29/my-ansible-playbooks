@@ -1,0 +1,52 @@
+---
+- name: Simple playbook for web deployment on Linux servers
+  hosts: webservers
+
+    
+  tasks: 
+  - name: Install web server on linux servers
+    package: 
+       name: "{{ web_server }}"
+       state: present
+
+  - name: Install firewall on linux servers
+    package: 
+       name: "{{ firewall_pkg }}"
+       state: present
+
+  - name: Upload home page to remote servers. 
+    template: 
+      src: index.j2
+      dest: /var/www/html/index.html
+
+  - name: Start and enable web service
+    service: 
+      name: "{{ web_service }}"
+      state: restarted
+      enabled: yes
+
+  - name: Start firewall service
+    service: 
+       name: firewalld
+       enabled: yes
+       state: restarted 
+    when: ansible_distribution == "RedHat"
+
+  - name: Open port for http using firewalld
+    firewalld:
+        permanent: yes
+        immediate: yes
+        service: http
+        state: enabled
+    when: inventory_hostname in groups["webservers"] and ansible_distribution == "RedHat"
+
+
+  - name: Open port for http using ufw
+    ufw: 
+      rule: allow
+      port: 80
+      proto: tcp
+    when: inventory_hostname in groups["webservers"] and ansible_distribution == "Ubuntu"
+
+
+
