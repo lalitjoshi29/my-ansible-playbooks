@@ -1,0 +1,16 @@
+---
+- name: restart webservice
+  service: 
+      name: "{{ web.svc }}"
+      state: reloaded
+
+
+- name: reload firewalld firewall service
+  service: 
+      name: "{{ fw.svc }}"
+      state: reloaded
+
+- name: restart ufw firewall service
+  service: 
+     name: "{{ fw.svc }}"
+     state: restarted

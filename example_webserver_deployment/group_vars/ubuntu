@@ -1,0 +1,10 @@
+---
+   web:
+      pkg: apache2
+      svc: apache2
+   fw:
+      pkg: ufw
+      svc: ufw
+      port: 80
+      proto: tcp
+

@@ -1,0 +1,9 @@
+---
+   web:
+      pkg: httpd
+      svc: httpd
+   fw:    
+      pkg: firewalld
+      svc: firewalld   
+      rule: http
+

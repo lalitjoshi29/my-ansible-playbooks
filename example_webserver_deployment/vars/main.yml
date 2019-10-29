@@ -1,0 +1,18 @@
+#---
+#centos:
+#   web:
+#      pkg: httpd
+#      svc: httpd
+#   fw:    
+#      pkg: firewalld
+#      svc: firewalld   
+#      rule: http
+#
+#ubuntu:
+#   web:
+#      pkg: apache2
+#      svc: apache2
+#   fw:
+#      pkg: ufw
+#      port: http
+#      proto: tcp

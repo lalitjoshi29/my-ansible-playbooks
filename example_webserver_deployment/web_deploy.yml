@@ -1,0 +1,47 @@
+---
+- name: Generic playbook for web deployment on different flavors of Linux (Centos & Ubuntu)
+  hosts: all
+
+  tasks: 
+     - name: Install packages
+       package: 
+          name: "{{ item }}"
+          state: present
+       with_items: 
+          - "{{ web.pkg }}"
+          - "{{ fw.pkg }}"
+
+     - name: Enable and start the services
+       service: 
+          name: "{{ item }}"
+          state: started
+          enabled: true
+       with_items:
+          - "{{ web.svc }}"
+          - "{{ fw.svc }}"
+
+     - name: copy first page (template) to web servers
+       template: 
+         src: index.j2
+         dest: /var/www/html/index.html
+       notify: restart webservice
+       
+     - name: Open firewall port for http - centos servers
+       firewalld: 
+          permanent: yes
+          immediate: yes
+          service: "{{ fw.rule }}"
+          state: enabled
+       when: ansible_distribution == "CentOS"
+       notify: reload firewalld firewall service
+
+     - name: Open firewall port for http - ubuntu servers
+       ufw: 
+         rule: allow
+         port: "{{ fw.port }}"
+         proto: "{{ fw.proto }}"
+       when: ansible_distribution == "Ubuntu"
+       notify: restart ufw firewall service       
+
+  handlers: 
+     - include: handlers/main.yml
